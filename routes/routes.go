@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(router *mux.Router) {
+func RegisterProductRoutes(router *mux.Router) {
 	router.HandleFunc("/products", controllers.CreateProduct).Methods("POST")
 	router.HandleFunc("/products", controllers.GetProducts).Methods("GET")
 	router.HandleFunc("/products/{id}", controllers.GetProductByID).Methods("GET")
