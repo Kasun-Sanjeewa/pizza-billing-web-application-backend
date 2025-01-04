@@ -7,6 +7,8 @@ import (
 	"project/database"
 	"project/models"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 // HandleCheckout stores the checkout details in the database
@@ -47,4 +49,68 @@ func storePayment(payment models.Payment) error {
 	}
 
 	return nil
+}
+
+// GetAllPayments retrieves all payment details from the database
+func GetAllPayments(w http.ResponseWriter, r *http.Request) {
+	rows, err := database.DB.Query("SELECT id, date, selected_items, total, tax, payable FROM payments")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error fetching payments: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var payments []models.Payment
+	for rows.Next() {
+		var payment models.Payment
+		// Update the scanning of the 'date' field
+		var date []byte
+		err := rows.Scan(&payment.ID, &date, &payment.SelectedItems, &payment.Total, &payment.Tax, &payment.Payable)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error scanning row: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		// Convert the date []byte to time.Time
+		if len(date) > 0 {
+			payment.Date, err = time.Parse("2006-01-02 15:04:05", string(date))
+			if err != nil {
+				http.Error(w, fmt.Sprintf("Error parsing date: %v", err), http.StatusInternalServerError)
+				return
+			}
+		}
+		payments = append(payments, payment)
+	}
+
+	// Send the list of payments as JSON
+	json.NewEncoder(w).Encode(payments)
+}
+
+// GetPaymentByID retrieves a single payment's details by its ID
+func GetPaymentByID(w http.ResponseWriter, r *http.Request) {
+	// Extract the payment ID from the URL
+	params := mux.Vars(r)
+	id := params["id"]
+
+	// Query the database for payment details by ID
+	var payment models.Payment
+	var date []byte
+	query := "SELECT id, date, selected_items, total, tax, payable FROM payments WHERE id = ?"
+	err := database.DB.QueryRow(query, id).Scan(&payment.ID, &date, &payment.SelectedItems, &payment.Total, &payment.Tax, &payment.Payable)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error fetching payment: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the date []byte to time.Time
+	if len(date) > 0 {
+		payment.Date, err = time.Parse("2006-01-02 15:04:05", string(date))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error parsing date: %v", err), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Send the payment details as JSON
+	json.NewEncoder(w).Encode(payment)
 }
