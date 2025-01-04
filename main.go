@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"project/database"
 	"project/routes"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func main() {
 
 	// Initialize routes
 	routes.RegisterProductRoutes(r)
+	routes.RegisterPaymentRoutes(r)
 
 	// CORS configuration
 	corsAllowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
