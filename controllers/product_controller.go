@@ -16,8 +16,8 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
 	json.NewDecoder(r.Body).Decode(&product)
 
-	query := "INSERT INTO products (name, barcode, price, img) VALUES (?, ?, ?, ?)"
-	res, err := database.DB.Exec(query, product.Name, product.Barcode, product.Price, product.Img)
+	query := "INSERT INTO products (name, barcode, price, img, category) VALUES (?, ?, ?, ?, ?)"
+	res, err := database.DB.Exec(query, product.Name, product.Barcode, product.Price, product.Img, product.Category)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -30,7 +30,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 // Get all products
 func GetProducts(w http.ResponseWriter, r *http.Request) {
-	rows, err := database.DB.Query("SELECT id, name, barcode, price, img FROM products")
+	rows, err := database.DB.Query("SELECT id, name, barcode, price, img, category FROM products")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -40,7 +40,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	var products []models.Product
 	for rows.Next() {
 		var product models.Product
-		rows.Scan(&product.ID, &product.Name, &product.Barcode, &product.Price, &product.Img)
+		rows.Scan(&product.ID, &product.Name, &product.Barcode, &product.Price, &product.Img, &product.Category)
 		products = append(products, product)
 	}
 	json.NewEncoder(w).Encode(products)
@@ -53,7 +53,7 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 
 	var product models.Product
 	query := "SELECT id, name, barcode, price, img FROM products WHERE id = ?"
-	err := database.DB.QueryRow(query, id).Scan(&product.ID, &product.Name, &product.Barcode, &product.Price, &product.Img)
+	err := database.DB.QueryRow(query, id).Scan(&product.ID, &product.Name, &product.Barcode, &product.Price, &product.Img, &product.Category)
 	if err != nil {
 		http.Error(w, "Product not found", http.StatusNotFound)
 		return
@@ -70,8 +70,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
 	json.NewDecoder(r.Body).Decode(&product)
 
-	query := "UPDATE products SET name = ?, barcode = ?, price = ?, img = ? WHERE id = ?"
-	_, err := database.DB.Exec(query, product.Name, product.Barcode, product.Price, product.Img, id)
+	query := "UPDATE products SET name = ?, barcode = ?, price = ?, img = ?, category = ? WHERE id = ?"
+	_, err := database.DB.Exec(query, product.Name, product.Barcode, product.Price, product.Img, product.Category, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
