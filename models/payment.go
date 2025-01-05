@@ -9,4 +9,5 @@ type Payment struct {
 	Total         float64   `json:"total"`
 	Tax           float64   `json:"tax"`
 	Payable       float64   `json:"payable"`
+	InvoiceNumber string    `json:"invoiceNumber"`
 }
