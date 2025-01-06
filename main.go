@@ -20,6 +20,7 @@ func main() {
 	// Initialize routes
 	routes.RegisterProductRoutes(r)
 	routes.RegisterPaymentRoutes(r)
+	routes.RegisterRoutes(r)
 
 	// CORS configuration
 	corsAllowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
